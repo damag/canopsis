@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from canopsis.common.ws import route
-from canopsis.linklist.manager import Linklist
-from canopsis.entitylink.manager import Entitylink
+from canopsis.linklist.manager import LinklistManager
 
-link_list_manager = Linklist()
-entity_link_manager = Entitylink()
+link_list_manager = LinklistManager()
 
 DEFAULT_ROUTE = 'linklist'
 
@@ -54,5 +52,5 @@ def exports(ws):
         name='entitylink'
     )
     def get_entitylink(event):
-        ws.logger.debug({'received event': event})
-        return entity_link_manager.get_links_from_event(event)
+        #ws.logger.debug({'received event': event})
+        return link_list_manager.get_links_from_event(event)

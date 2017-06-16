@@ -87,6 +87,7 @@ def del_singleton_per_scope(cls, scope=None):
 
 
 def dynmodloads(_path='.', subdef=False, pattern='.*', logger=None):
+    # UNUSED ?! What does it do ?
     loaded = {}
     _path = expanduser(_path)
 
@@ -291,6 +292,8 @@ def isunicode(s):
     """
     Check if string is unicode.
 
+    UNSUED ?!
+
     :param s: string to check
     :type s: basestring
 
@@ -414,6 +417,7 @@ def get_first(iterable, default=None):
 def prototype(typed_args=None, typed_kwargs=None, typed_return=None):
     """
     Decorate a function to check its parameters type.
+    UNUSED ?!
 
     :param typed_args: Types for args
     :type typed_args: tuple

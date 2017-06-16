@@ -7,6 +7,7 @@ from canopsis.configuration.configurable.decorator import conf_paths
 from canopsis.configuration.model import Parameter
 from canopsis.configuration.configurable.decorator import add_category
 from canopsis.event import forger
+#from canopsis.linklist.manager import update_linklist
 
 import time
 
@@ -28,6 +29,7 @@ class ContextGraph(MiddlewareRegistry):
     ORGANISATIONS_STORAGE = 'organisations_storage'
     USERS_STORAGE = 'measurements_storage'
     NAME = 'name'
+    INFOS = 'infos'  # infos field name in the entity
 
     RESOURCE = "resource"
     COMPONENT = "component"
@@ -171,23 +173,20 @@ class ContextGraph(MiddlewareRegistry):
         get_entities_by_id return every entities who match the ids present
         in the list
 
-        :param id: the id of an entity. id can be a list
-        :return type: a list of entity
+        :param _id: the id of an entity
+        :type _id: str or list
+        :rtype: a list of entity dicts
         """
 
         query = {"_id": None}
         if isinstance(_id, list):
-            ids = []
-            for i in _id:
-                ids.append(i)
-            query["_id"] = {"$in": ids}
+            query["_id"] = {"$in": _id}
         else:
             query["_id"] = _id
 
-        result = list(
-            self[ContextGraph.ENTITIES_STORAGE].get_elements(query=query))
+        result = self[ContextGraph.ENTITIES_STORAGE].get_elements(query=query)
 
-        return result
+        return list(result)
 
     def _put_entities(self, entities):
         """
@@ -251,7 +250,7 @@ class ContextGraph(MiddlewareRegistry):
 
                 infos["enable_history"].append(int(time.time()))
 
-
+    #@update_linklist
     def create_entity(self, entity):
         """Create an entity in the context with the given entity. This will
         update the depends and impact links between entities. If they are
@@ -371,6 +370,7 @@ class ContextGraph(MiddlewareRegistry):
 
         return updated_entities
 
+    #@update_linklist
     def update_entity(self, entity):
         """Update an entity identified by id_ with the given entity.
         If needed, the fields impact/depends of the related entity will be
@@ -399,7 +399,7 @@ class ContextGraph(MiddlewareRegistry):
             old_entity = self.get_entities_by_id(entity["_id"])[0]
         except IndexError:
             raise ValueError(
-                "The _id {0} does not match any entity in database.".format(
+                "The _id {} does not match any entity in database.".format(
                     entity["_id"]))
 
         # check if the old entity differ from the updated one

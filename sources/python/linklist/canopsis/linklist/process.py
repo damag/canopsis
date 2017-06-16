@@ -18,6 +18,29 @@
 # along with Canopsis.  If not, see <http://www.gnu.org/licenses/>.
 # ---------------------------------
 
-# attach this project to canopsis package
-from pkgutil import extend_path
-__path__ = extend_path(__path__, __name__)
+from __future__ import unicode_literals
+
+from canopsis.common.utils import singleton_per_scope
+from canopsis.task.core import register_task
+
+from canopsis.linklist.manager import LinklistManager
+
+
+@register_task
+def event_processing(engine, event, llmngr=None, logger=None, **kwargs):
+    if llmngr is None:
+        llmngr = singleton_per_scope(LinklistManager)
+
+    encoded_event = {}
+    for k, v in event.items():
+        try:
+            k = k.encode('utf-8')
+        except:
+            pass
+        try:
+            v = v.encode('utf-8')
+        except:
+            pass
+        encoded_event[k] = v
+
+    llmngr.enrich_from_event(encoded_event)

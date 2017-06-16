@@ -499,7 +499,6 @@ class MongoStorage(MongoDataBase, Storage):
             self, spec, document, cache=False, multi=True, upsert=True,
             **kwargs
     ):
-
         if cache and self._cache is None:
             self._init_cache()
 

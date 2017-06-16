@@ -25,8 +25,8 @@ install_requires = [
     'canopsis.common',
     'canopsis.configuration',
     'canopsis.middleware',
-    'canopsis.context',
     'canopsis.ctxprop',
+    'canopsis.context_graph',
     'canopsis.mongo',
     'canopsis.engines',
     'canopsis.event'
@@ -35,4 +35,4 @@ install_requires = [
 setup(
     description='Canopsis linklist library',
     install_requires=install_requires,
-    keywords='link list')
+    keywords='linklist')

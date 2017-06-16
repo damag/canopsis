@@ -179,6 +179,8 @@ function post_install_influxdb() {
     launch_cmd 1 service influxdb start
     wait_for_influx_install
 
+    sleep 10
+
     # Define user
     if [ "x$INFLUXDB_ADMIN_PASSWD" == "x" ]
     then
