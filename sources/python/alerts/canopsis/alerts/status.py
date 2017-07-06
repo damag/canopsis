@@ -18,6 +18,9 @@
 # along with Canopsis.  If not, see <http://www.gnu.org/licenses/>.
 # ---------------------------------
 
+from time import time
+
+from canopsis.alerts import AlarmField, States
 from canopsis.common.utils import ensure_iterable
 from canopsis.check import Check
 
@@ -26,6 +29,44 @@ ONGOING = 1
 STEALTHY = 2
 FLAPPING = 3
 CANCELED = 4
+
+
+def get_last_state(alarm, ts=None):
+    """
+    Get last alarm state.
+
+    :param alarm: Alarm history
+    :type alarm: dict
+
+    :param ts: Timestamp to look from (optional)
+    :type ts: int
+
+    :returns: Most recent state
+    """
+
+    if alarm[AlarmField.state.value] is not None:
+        return alarm[AlarmField.state.value]['val']
+
+    return Check.OK
+
+
+def get_last_status(alarm, ts=None):
+    """
+    Get last alarm status.
+
+    :param alarm: Alarm history
+    :type alarm: dict
+
+    :param ts: Timestamp to look from (optional)
+    :type ts: int
+
+    :returns: Most recent status
+    """
+
+    if alarm[AlarmField.status.value] is not None:
+        return alarm[AlarmField.status.value]['val']
+
+    return OFF
 
 
 def get_previous_step(alarm, steptypes, ts=None):
@@ -44,55 +85,17 @@ def get_previous_step(alarm, steptypes, ts=None):
     :returns: Most recent step
     """
 
-    if len(alarm['steps']) > 0:
+    if len(alarm[AlarmField.steps.value]) > 0:
         if ts is None:
-            ts = alarm['steps'][-1]['t'] + 1
+            ts = alarm[AlarmField.steps.value][-1]['t'] + 1
 
         steptypes = ensure_iterable(steptypes)
 
-        for step in reversed(alarm['steps']):
+        for step in reversed(alarm[AlarmField.steps.value]):
             if step['t'] < ts and step['_t'] in steptypes:
                 return step
 
     return None
-
-
-def get_last_state(alarm, ts=None):
-    """
-    Get last alarm state.
-
-    :param alarm: Alarm history
-    :type alarm: dict
-
-    :param ts: Timestamp to look from (optional)
-    :type ts: int
-
-    :returns: Most recent state
-    """
-
-    if alarm['state'] is not None:
-        return alarm['state']['val']
-
-    return Check.OK
-
-
-def get_last_status(alarm, ts=None):
-    """
-    Get last alarm status.
-
-    :param alarm: Alarm history
-    :type alarm: dict
-
-    :param ts: Timestamp to look from (optional)
-    :type ts: int
-
-    :returns: Most recent status
-    """
-
-    if alarm['status'] is not None:
-        return alarm['status']['val']
-
-    return OFF
 
 
 def is_flapping(manager, alarm):
@@ -106,13 +109,14 @@ def is_flapping(manager, alarm):
     :type alarm: dict
 
     :returns: ``True`` if alarm is flapping, ``False`` otherwise
+    :rtype: bool
     """
 
     statestep = None
     freq = 0
-    ts = alarm['state']['t']
+    ts = alarm[AlarmField.state.value]['t']
 
-    for step in reversed(alarm['steps']):
+    for step in reversed(alarm[AlarmField.steps.value]):
         if (ts - step['t']) > manager.flapping_interval:
             break
 
@@ -134,6 +138,24 @@ def is_flapping(manager, alarm):
     return False
 
 
+def is_keeped_state(alarm):
+    """
+    Check if an alarm state must be keeped.
+
+    :param manager: Alerts manager
+    :type manager: canopsis.alerts.manager.Alerts
+
+    :param alarm: Alarm history
+    :type alarm: dict
+
+    :returns: ``True`` if alarm state is forced, ``False`` otherwise
+    :rtype: bool
+    """
+    state = alarm[AlarmField.state.value]
+
+    return state is not None and '_t' in state and state['_t'] == States.changestate.value
+
+
 def is_stealthy(manager, alarm):
     """
     Check if alarm is stealthy.
@@ -144,20 +166,23 @@ def is_stealthy(manager, alarm):
     :param alarm: Alarm history
     :type alarm: dict
 
-    :returns: ``True`` if alarm is stealthy, ``False`` otherwise
+    :returns: ``True`` if alarm is supposed to be stealthy, ``False`` otherwise
+    :rtype: bool
     """
 
-    ts = alarm['state']['t']
+    ts = alarm[AlarmField.state.value]['t']
 
-    for step in reversed(alarm['steps']):
-        if (ts - step['t']) > manager.stealthy_show_duration:
-            break
-
-        elif (ts - step['t']) > manager.stealthy_interval:
+    for step in reversed(alarm[AlarmField.steps.value]):
+        delta1 = ts - step['t']  # delta from last state change
+        delta2 = int(time()) - step['t']  # delta from now
+        if delta1 > manager.stealthy_show_duration or \
+           delta1 > manager.stealthy_interval or \
+           delta2 > manager.stealthy_show_duration or \
+           delta2 > manager.stealthy_interval:
             break
 
         if step['_t'] in ['stateinc', 'statedec']:
-            if step['val'] != Check.OK and alarm['state']['val'] == Check.OK:
+            if step['val'] != Check.OK and alarm[AlarmField.state.value]['val'] == Check.OK:
                 return True
 
     return False
@@ -174,9 +199,10 @@ def compute_status(manager, alarm):
     :type alarm: dict
 
     :returns: Alarm status as int
+    :rtype: int
     """
 
-    if alarm['canceled'] is not None:
+    if alarm[AlarmField.canceled.value] is not None:
         return CANCELED
 
     if is_flapping(manager, alarm):
@@ -185,7 +211,7 @@ def compute_status(manager, alarm):
     elif is_stealthy(manager, alarm):
         return STEALTHY
 
-    elif alarm['state']['val'] != Check.OK:
+    elif alarm[AlarmField.state.value]['val'] != Check.OK:
         return ONGOING
 
     else:

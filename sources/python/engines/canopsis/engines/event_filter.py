@@ -22,14 +22,14 @@ from canopsis.engines.core import Engine, DROP, publish
 
 from canopsis.alerts.manager import Alerts
 from canopsis.context_graph.manager import ContextGraph
-
+from canopsis.common.utils import singleton_per_scope
 from canopsis.old.account import Account
 from canopsis.old.storage import get_storage
 from canopsis.event import forger, get_routingkey
 from canopsis.old.mfilter import check
+from canopsis.pbehavior.manager import PBehaviorManager
 
 from json import loads
-from time import time
 
 
 class engine(Engine):
@@ -41,42 +41,12 @@ class engine(Engine):
         account = Account(user="root", group="root")
         self.storage = get_storage(logging_level=self.logging_level,
                                    account=account)
-        self.derogations = []
         self.name = kargs['name']
         self.drop_event_count = 0
         self.pass_event_count = 0
 
     def pre_run(self):
         self.beat()
-
-    def time_conditions(self, derogation):
-        conditions = derogation.get('time_conditions', None)
-
-        if not isinstance(conditions, list):
-            self.logger.error(("Invalid time conditions field in '%s': %s"
-                               % (derogation['_id'], conditions)))
-            self.logger.debug(derogation)
-            return False
-
-        result = False
-
-        now = time()
-        for condition in conditions:
-            if (condition['type'] == 'time_interval'
-                    and condition['startTs']
-                    and condition['stopTs']):
-                always = condition.get('always', False)
-
-                if always:
-                    self.logger.debug(" + 'time_interval' is 'always'")
-                    result = True
-
-                elif (now >= condition['startTs']
-                      and now < condition['stopTs']):
-                    self.logger.debug(" + 'time_interval' Match")
-                    result = True
-
-        return result
 
     def a_override(self, event, action):
         """Override a field from event or add a new one if it does not have
@@ -396,6 +366,24 @@ class engine(Engine):
                     u'Event: {}, filter matches'.format(event.get('rk', event))
                 )
 
+                if 'pbehaviors' in filterItem:
+                    pbehaviors = filterItem.get('pbehaviors', {})
+                    list_in = pbehaviors.get('in', [])
+                    list_out = pbehaviors.get('out', [])
+
+                    if list_in or list_out:
+                        pbm = singleton_per_scope(PBehaviorManager)
+                        cm = singleton_per_scope(ContextGraph)
+                        entity = cm.get_entity(event)
+                        entity_id = cm.get_entity_id(entity)
+
+                        result = pbm.check_pbehaviors(
+                            entity_id, list_in, list_out
+                        )
+
+                        if not result:
+                            break
+
                 for action in actions:
                     if action['type'].lower() == 'drop':
                         self.apply_actions(event, to_apply)
@@ -435,7 +423,6 @@ class engine(Engine):
     def beat(self, *args, **kargs):
         """ Configuration reload for realtime ui changes handling """
 
-        self.derogations = []
         self.configuration = {
             'rules': [],
             'default_action': self.find_default_action()

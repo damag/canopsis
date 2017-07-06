@@ -26,12 +26,8 @@ from canopsis.common.utils import ensure_iterable
 from canopsis.context_graph.manager import ContextGraph
 from canopsis.old.record import Record
 
-from canopsis.selector.manager import Selector
-
 from base64 import b64decode
 from json import loads
-
-selector_manager = Selector()
 
 def get_records(ws, namespace, ctype=None, _id=None, **params):
     options = {
@@ -177,6 +173,7 @@ def get_records(ws, namespace, ctype=None, _id=None, **params):
 
 
 def save_records(ws, namespace, ctype, _id, items):
+
     records = []
 
     for data in items:
@@ -363,11 +360,6 @@ def exports(ws):
         except ValueError as err:
             return HTTPError(500, 'Impossible to parse body: {0}'.format(err))
 
-
-        for i in loads(body):
-            if i['crecord_type'] == 'selector':
-                selector_manager.create_selector(i)
-
         return save_records(ws, namespace, ctype, _id, items)
 
     @route(ws.application.delete, raw_body=True, adapt=False)  # NOQA
@@ -377,5 +369,5 @@ def exports(ws):
 
         except ValueError:
             data = None
-
+        
         return delete_records(ws, namespace, ctype, _id, data)
