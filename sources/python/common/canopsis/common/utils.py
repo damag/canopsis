@@ -328,6 +328,27 @@ def ensure_unicode(s):
     return result
 
 
+def encode_utf8(dict_):
+    """Convert every string key and related string value to utf-8.
+
+    :param dict event: the dict
+    :return dict: the new dict with all string convert to utf-8
+    """
+    encoded_event = {}
+    for k, v in event.items():
+        try:
+            k = k.encode('utf-8')
+        except:
+            pass
+        try:
+            v = v.encode('utf-8')
+        except:
+            pass
+        encoded_event[k] = v
+
+    return encoded_event
+
+
 def forceUTF8(data, _memory=None):
     """Return a copy of data where all embedded strings are UTF8.
 
