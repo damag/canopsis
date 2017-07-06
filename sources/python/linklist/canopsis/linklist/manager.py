@@ -19,9 +19,8 @@
 # ---------------------------------
 from __future__ import unicode_literals
 
-#from functools import wraps
-import json
-from six import string_types
+from functools import wraps
+#import json
 
 from canopsis.configuration.configurable.decorator import (
     conf_paths, add_category)
@@ -32,9 +31,9 @@ from canopsis.middleware.registry import MiddlewareRegistry
 CONF_PATH = 'linklist/linklist.conf'
 CATEGORY = 'LINKLIST'
 
-"""
+
 def update_linklist(f):
-    ""Recalculate all linklist filter, after an entity update for example""
+    """Recalculate a linklist filter, after an entity update for example"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         retval = f(*args, **kwargs)
@@ -48,9 +47,7 @@ def update_linklist(f):
             return retval
 
         return LinklistManager.apply_all_filters(new_entity)
-
     return decorated_function
-"""
 
 
 @conf_paths(CONF_PATH)
@@ -61,7 +58,6 @@ class LinklistManager(MiddlewareRegistry):
     """
 
     LINKLIST_STORAGE = 'linklist_storage'  #: linklist storage name
-    CG_LINKS = 'filterlink'  # field name for linklist in entities
 
     def __init__(self, linklist_storage=None, *args, **kwargs):
         super(LinklistManager, self).__init__(*args, **kwargs)
@@ -72,8 +68,7 @@ class LinklistManager(MiddlewareRegistry):
         if linklist_storage is not None:
             self[LinklistManager.CONFIG_STORAGE] = linklist_storage
 
-    def find(self, limit=None, skip=None, ids=None, sort=None,
-             with_count=False, _filter={}):
+    def find(self, limit=None, skip=None, ids=None, sort=None, with_count=False, _filter={}):
         """
         Find linklist documents in db.
 
@@ -100,29 +95,23 @@ class LinklistManager(MiddlewareRegistry):
         """
         Put a linklist documents in db.
 
-        :param document: document to put
-        :type document: dict
+        :param dict document: document to put
         :return: put result
         :rtype: dict
         """
+        #if not document.get('id'):
+        #    document['_id'] = str(uuid.uuid4())  # NOT auto ??
+        #else:
+        #    document['_id'] = document.pop('id')
 
-        # If its a string, converting mfilter to dict
-        mfilter = document['mfilter']
-        if isinstance(mfilter, string_types):
-            try:
-                document['mfilter'] = json.loads(mfilter)
-            except:
-                raise ValueError('Cannot parse mfilter item "{}"'.format(mfilter))
-
-        return (self[LinklistManager.LINKLIST_STORAGE]
-                .put_element(element=document))
+        return self[LinklistManager.LINKLIST_STORAGE].put_element(element=document)
 
     def remove(self, ids):
         """
         Remove a linklist documents in db.
 
         :param ids: identifier for documents to remove
-        :type ids: list
+        :type: ids: list
         """
 
         self[LinklistManager.LINKLIST_STORAGE].remove_elements(ids=ids)
@@ -149,72 +138,61 @@ class LinklistManager(MiddlewareRegistry):
         return result
     """
 
-    def apply_all_filters(self, entity):
+    @classmethod
+    def apply_all_filters(cls, entity):
         """
         Find and apply linklist filters on an entity.
 
         :param entity: the entity to enrich
-        :type entity: dict
+        :param forced: the link came from an action event
         :return: nothing
         """
-        # TODO : Decorate create/update/delete entity action with this function
-        for linklist in self.find():
-            print(linklist)
+        # TODO : Decorate create and update entity action with this function
+        for linklist in cls.find():
+
             name = linklist.get('name', None)
             l_filter = linklist.get('mfilter', None)
+
             if name is None or l_filter is None:
-                self.logger.info('Cannot proceed linklist {}'.format(linklist))
+                cls.logger.info('Cannot proceed linklist {}'.format(linklist))
                 continue
 
-            self.logger.debug('Proceeding linklist {}'.format(name))
+            cls.logger.debug('Proceeding linklist {}'.format(name))
+
+            # Enrich each founded entity with current links
+            #for entity in cls.get_entity_from_filter(l_filter):
 
             # Enrich the entity if it match the filter
-            #if self.event.check_entity(entity=entity, filter_=l_filter):
-            #    l_list = linklist.get(self.CG_LINKS, [])
-            #    print(l_list)
-            #    self.enrich_from_entity(entity=entity, links=l_list)
-
-            l_list = linklist.get(self.CG_LINKS, [])
-            # Get events from this filter
-            print(l_filter)
-            print(type(l_filter))
-            for event in self.event.find(query=l_filter):
-                print(event)
-                ev_entity = ContextGraph.get_id(event=event)
-                print(ev_entity)
-                if entity['_id'] == ev_entity['_id']:
-                    self.enrich_from_entity(entity=entity, links=l_list)
+            if ContextGraph.check_entity(entity, l_filter):
+                l_list = linklist.get('filterlink', [])
+                cls.enrich_from_entity(entity=entity, links=l_list)
 
     def enrich_from_entity(self, entity, links, forced=False):
         """
         Enrich an entity with a list of links.
 
-        :param entity: the entity to enrich [sic]
-        :type entity: dict
-        :param links: a list of link dict
-        :type links: list(dict)
-        :param forced: is links will NOT be purged on the next enrichment ?
-        :type: bool
+        :rtype: the updated entity
         """
         purged_links = []
         # Remove not forced links from actual linklist
-        for links_ in entity[ContextGraph.INFOS].get(self.CG_LINKS, []):
-            if links_.get('forced', False):
+        for links_ in entity['info']['filterlink']:
+            if links_['forced']:
                 purged_links.append(links_)
 
-        # Add a flag for forced links
+        # Add a flag on forced links
         if forced:
-            for link in links:
-                link['forced'] = forced
+            for links_ in links:
+                links_['forced'] = True
 
         # Merge purged linklist with the desired one
         merge = purged_links + [x for x in links if x not in purged_links]
-        # TODO: duplication if a link is forced and not forced at the same time ?
+        # TODO: duplication if a link link is forced and not forced at the same time ?
 
-        entity[ContextGraph.INFOS][self.CG_LINKS] = merge
+        entity['info']['filterlink'] = merge
+        # TODO: fusion with old ones / remove unflagged links
         self.logger.debug('enrich entity "{}" with links: {}'
                           .format(entity['name'], merge))
-        self.context_graph.update_entity(entity)
+        return self.context_graph.update_entity(entity)
 
     def enrich_from_event(self, event):
         """
@@ -224,28 +202,19 @@ class LinklistManager(MiddlewareRegistry):
         :param event: the arrived event
         :type: event: dict
         """
-        entity_id = self.context_graph.get_id(event)
-        entities = self.context_graph.get_entities_by_id(entity_id)
-        links = [{
-            'name': 'action url',
-            'url': event['action_url'],
-            'category': 'procedure'
-        }]  # TODO : get real datas !!
-        for entity in entities:
-            self.logger.debug('enrich from event entity "{}"'.format(entity))
-            self.enrich_from_entity(entity=entity, links=links, forced=True)
+        entity = self.context_graph.get_id(event)
+        links = event['action_url']  # TODO !!
+        self.enrich_from_entity(entity=entity, links=links, forced=True)
 
     def get_links_from_event(self, event):
         """
+        TEMPORARY!
         Return all links of an event.
-        TEMPORARY! AND DEPRECATED!
-        linklists should be returned with the context (see infos field)
-
-        :param event: the targeted event
-        :return: a list of links (as dict)
-        :rtype: list
+        DEPRECATED!
+        Not necesseray anymore with the new context.
         """
-        entity_id = self.context_graph.get_id(event)
-        entity = self.context_graph.get_entities_by_id(entity_id).pop()
-        return entity[ContextGraph.INFOS].get(self.CG_LINKS, None)
+        # TODO: find that in the context (from entitylink.manager)
+        #entity = self.context_graph.get_id(event)
+        return self.find(ids=[self.context.get_id(event)])
+
 
