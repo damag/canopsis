@@ -24,23 +24,22 @@ from canopsis.common.utils import singleton_per_scope
 from canopsis.task.core import register_task
 
 from canopsis.linklist.manager import LinklistManager
+from canopsis.common.utils import encode_utf8
 
+LINK_KEY = "event_link"
 
 @register_task
 def event_processing(engine, event, llmngr=None, logger=None, **kwargs):
+
     if llmngr is None:
         llmngr = singleton_per_scope(LinklistManager)
 
-    encoded_event = {}
-    for k, v in event.items():
-        try:
-            k = k.encode('utf-8')
-        except:
-            pass
-        try:
-            v = v.encode('utf-8')
-        except:
-            pass
-        encoded_event[k] = v
+    encoded_event = encode_utf8(event)
 
     llmngr.enrich_from_event(encoded_event)
+
+
+@register_task
+def beat(engine, logger=None, **kwargs):
+    # TODO reload configuration
+    pass
