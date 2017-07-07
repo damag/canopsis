@@ -20,13 +20,10 @@
 
 from __future__ import unicode_literals
 
-from canopsis.common.utils import singleton_per_scope
+from canopsis.common.utils import singleton_per_scope, encode_utf8
+from canopsis.linklist.manager import LinklistManager
 from canopsis.task.core import register_task
 
-from canopsis.linklist.manager import LinklistManager
-from canopsis.common.utils import encode_utf8
-
-LINK_KEY = "event_link"
 
 @register_task
 def event_processing(engine, event, llmngr=None, logger=None, **kwargs):
@@ -41,5 +38,5 @@ def event_processing(engine, event, llmngr=None, logger=None, **kwargs):
 
 @register_task
 def beat(engine, logger=None, **kwargs):
-    # TODO reload configuration
+    # TODO
     pass
