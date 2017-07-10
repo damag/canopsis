@@ -106,9 +106,9 @@ class LinklistManager(MiddlewareRegistry):
         :rtype: dict
         """
 
-        # If its a string, converting mfilter to dict
         mfilter = document['mfilter']
         if isinstance(mfilter, string_types):
+            # If its a string, converting mfilter to dict
             try:
                 document['mfilter'] = json.loads(mfilter)
             except:
@@ -123,9 +123,10 @@ class LinklistManager(MiddlewareRegistry):
 
         :param ids: identifier for documents to remove
         :type ids: list
+        :return: the mongo response
         """
 
-        self[LinklistManager.LINKLIST_STORAGE].remove_elements(ids=ids)
+        return self[LinklistManager.LINKLIST_STORAGE].remove_elements(ids=ids)
 
     """
     def get_entity_from_filter(self, filter_):
@@ -250,4 +251,3 @@ class LinklistManager(MiddlewareRegistry):
         entity = self.context_graph.get_entities_by_id(entity_id).pop()
 
         return entity[ContextGraph.INFOS].get(self.CG_LINKS, None)
-
