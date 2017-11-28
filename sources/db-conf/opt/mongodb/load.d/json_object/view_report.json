@@ -1,0 +1,292 @@
+{
+    "_id": "view.report",
+    "id": "view.report",
+    "loader_id": "view.report",
+    "crecord_write_time": 1511800477,
+    "enable": true,
+    "description": "",
+    "author": "root",
+    "crecord_name": "Report",
+    "containerwidget": {
+        "widgetId": "container_4927fcbc-284b-6a14-bb35-d9f088fb94e4",
+        "preference_id": null,
+        "xtype": "widgetcontainer",
+        "title": null,
+        "widgetslotTemplate": "widgetslot-default",
+        "mixins": [
+            {
+                "name": "verticallayout"
+            },
+            {
+                "name": "widgetrefresh",
+                "EmberClass": {
+                    "mixins": [
+                        {
+                            "properties": {
+                                "partials": {
+                                    "titlebarsbuttons": [
+                                        "titlebarbutton-widgetrefresh"
+                                    ]
+                                },
+                                "_actions": {}
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "tagName": null,
+        "items": [
+            {
+                "id": "widgetwrapper_103b85ba-5845-40d1-8727-ba8d29fa18fe",
+                "widget": {
+                    "widgetId": "widget_widgetcontainer_97d89c99-5c74-1ecd-fd24-5d5175584e5c",
+                    "preference_id": null,
+                    "xtype": "widgetcontainer",
+                    "title": "Admin report action",
+                    "widgetslotTemplate": "widgetslot-light",
+                    "mixins": [
+                        {
+                            "description": "A layout for containers to display childs in a responsive grid",
+                            "EmberClass": {
+                                "mixins": [
+                                    {
+                                        "properties": {
+                                            "partials": {
+                                                "layout": [
+                                                    "gridlayout"
+                                                ]
+                                            },
+                                            "isGridLayout": {
+                                                "_dependentKeys": [],
+                                                "_readOnly": false,
+                                                "_cacheable": true
+                                            }
+                                        }
+                                    }
+                                ]
+                            },
+                            "name": "gridlayout",
+                            "id": "mixin_435a3b89-556e-bcbf-9d9e-5e2e42743444"
+                        }
+                    ],
+                    "tagName": null,
+                    "items": [
+                        {
+                            "id": "widgetwrapper_0a6f168e-5ac4-27dc-cef6-3bbbe0e6e6bf",
+                            "widget": {
+                                "widgetId": "widget_list_226c46cd-cfa9-99cd-1df4-1dafae4de6f9",
+                                "preference_id": "1cefa8e0-1f0a-382c-b6ce-44a596eef925",
+                                "xtype": "list",
+                                "title": "Mails",
+                                "listed_crecord_type": "usermail",
+                                "mixins": [
+                                    {
+                                        "name": "arraysearch",
+                                        "EmberClass": {
+                                            "mixins": [
+                                                {
+                                                    "properties": {
+                                                        "partials": {
+                                                            "header": [
+                                                                "search"
+                                                            ]
+                                                        },
+                                                        "_actions": {}
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "name": "crud",
+                                        "description": "Add CRUD operations management on widgets"
+                                    },
+                                    {
+                                        "name": "pagination",
+                                        "description": "Allow to iterate listed items by pages on widgets"
+                                    },
+                                    {
+                                        "name": "sortablearray",
+                                        "EmberClass": {
+                                            "mixins": [
+                                                {
+                                                    "properties": {
+                                                        "_actions": {},
+                                                        "attributesKeys": {
+                                                            "_dependentKeys": [
+                                                                "inspectedProperty",
+                                                                "inspectedDataArray"
+                                                            ],
+                                                            "_readOnly": false,
+                                                            "_cacheable": true
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ],
+                                "useRenderers": true,
+                                "id": "widget_list_226c46cd-cfa9-99cd-1df4-1dafae4de6f9",
+                                "columnsOrder": [],
+                                "tagName": null,
+                                "displayed_columns": [
+                                    "name",
+                                    "mail"
+                                ],
+                                "default_column_sort": {
+                                    "direction": "ASC",
+                                    "property": "name"
+                                },
+                                "contentTruncatedLength": 150
+                            },
+                            "mixins": [
+                                {
+                                    "columnMD": 6,
+                                    "forcelegacy": true,
+                                    "columnLG": 6,
+                                    "name": "gridlayout",
+                                    "columnXS": 12
+                                }
+                            ],
+                            "xtype": "widgetwrapper",
+                            "title": "wrapper"
+                        },
+                        {
+                            "id": "widgetwrapper_799da067-7441-adc1-6b1d-4ac5fc807856",
+                            "widget": {
+                                "widgetId": "widget_list_06c5aa31-07da-31f1-348d-d689d1e805df",
+                                "preference_id": "7902e0e6-e208-d58f-2d6d-578cb2052916",
+                                "xtype": "list",
+                                "title": "Causes",
+                                "listed_crecord_type": "cause",
+                                "mixins": [
+                                    {
+                                        "EmberClass": {
+                                            "mixins": [
+                                                {
+                                                    "properties": {
+                                                        "userCanCreateRecord": true,
+                                                        "userCanUpdateRecord": true,
+                                                        "partials": {
+                                                            "subHeader": [],
+                                                            "actionToolbarButtons": [],
+                                                            "itemactionbuttons": [],
+                                                            "footer": [],
+                                                            "selectionToolbarButtons": [],
+                                                            "header": []
+                                                        },
+                                                        "userCanDeleteRecord": true,
+                                                        "_actions": {},
+                                                        "userCanReadRecord": true
+                                                    }
+                                                },
+                                                {
+                                                    "properties": {
+                                                        "userCanDeleteRecord": {
+                                                            "_dependentKeys": [
+                                                                "config.listed_crecord_type"
+                                                            ],
+                                                            "_readOnly": false,
+                                                            "_cacheable": true
+                                                        },
+                                                        "userCanCreateRecord": {
+                                                            "_dependentKeys": [
+                                                                "config.listed_crecord_type"
+                                                            ],
+                                                            "_readOnly": false,
+                                                            "_cacheable": true
+                                                        },
+                                                        "userCanUpdateRecord": {
+                                                            "_dependentKeys": [
+                                                                "config.listed_crecord_type"
+                                                            ],
+                                                            "_readOnly": false,
+                                                            "_cacheable": true
+                                                        },
+                                                        "userCanReadRecord": {
+                                                            "_dependentKeys": [
+                                                                "config.listed_crecord_type"
+                                                            ],
+                                                            "_readOnly": false,
+                                                            "_cacheable": true
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "name": "crud",
+                                        "description": "Add CRUD operations management on widgets"
+                                    },
+                                    {
+                                        "name": "pagination",
+                                        "description": "Allow to iterate listed items by pages on widgets"
+                                    },
+                                    {
+                                        "name": "arraysearch"
+                                    },
+                                    {
+                                        "name": "sortablearray"
+                                    }
+                                ],
+                                "useRenderers": true,
+                                "id": "widget_list_06c5aa31-07da-31f1-348d-d689d1e805df",
+                                "columnsOrder": [],
+                                "tagName": null,
+                                "displayed_columns": [
+                                    "name"
+                                ],
+                                "default_column_sort": {
+                                    "direction": "ASC",
+                                    "property": "name"
+                                },
+                                "contentTruncatedLength": 150
+                            },
+                            "mixins": [
+                                {
+                                    "description": "A layout for containers to display childs in a responsive grid",
+                                    "columnXS": 12,
+                                    "name": "gridlayout",
+                                    "forcelegacy": true,
+                                    "columnMD": 6,
+                                    "columnLG": 6,
+                                    "id": "mixin_0d0871ac-bb98-debc-174a-84cda8f3df7d",
+                                    "EmberClass": {
+                                        "mixins": [
+                                            {
+                                                "properties": {
+                                                    "partials": {
+                                                        "layout": [
+                                                            "gridlayout"
+                                                        ]
+                                                    },
+                                                    "isGridLayout": {
+                                                        "_dependentKeys": [],
+                                                        "_readOnly": false,
+                                                        "_cacheable": true
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "xtype": "widgetwrapper",
+                            "title": "wrapper"
+                        }
+                    ],
+                    "id": "widget_widgetcontainer_97d89c99-5c74-1ecd-fd24-5d5175584e5c"
+                },
+                "mixins": [],
+                "xtype": "widgetwrapper",
+                "title": "wrapper"
+            }
+        ],
+        "id": "container_4927fcbc-284b-6a14-bb35-d9f088fb94e4"
+    },
+    "tags": [],
+    "crecord_creation_time": 1511777529,
+    "crecord_type": "view",
+    "internal": false
+}

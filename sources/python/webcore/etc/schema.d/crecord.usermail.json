@@ -1,0 +1,26 @@
+{
+    "type": "object",
+    "categories": [
+        {
+            "title": "General",
+            "keys": [
+                "name",
+                "mail"
+            ]
+        }
+    ],
+    "properties": {
+        "mail": {
+            "type": "string",
+            "required": true
+        },
+        "_id": {
+            "type": "string",
+            "required": true
+        },
+        "name": {
+            "type": "string",
+            "required": true
+        }
+    }
+}
