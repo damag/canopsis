@@ -54,13 +54,14 @@ def exports(ws):
             mail_info.get('recipients', ''),
             mail_info.get('body', ''),
             mail_info.get('smtp_host', 'localhost')
+            mail_info.get('smtp_port', 25)
        )
         return json.dumps({'result':{'description':'{0}'.format(res) },'status':200})
 
-def sendmail(fromaddr, toaddrs, message, smtp_host):
+def sendmail(fromaddr, toaddrs, message, smtp_host, smtp_port):
     msg = ("From: %s\r\nTo: %s\r\n\r\n"
        % (fromaddr, ", ".join(toaddrs)))
     msg = msg + message
-    server = smtplib.SMTP(smtp_host)
+    server = smtplib.SMTP(smtp_host, smtp_port)
     server.sendmail(fromaddr, toaddrs, msg)
     server.quit()
