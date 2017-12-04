@@ -53,7 +53,7 @@ def exports(ws):
             mail_info.get('account', 'root'),
             mail_info.get('recipients', ''),
             mail_info.get('body', ''),
-            mail_info.get('smtp_host', 'localhost')
+            mail_info.get('smtp_host', 'localhost'),
             mail_info.get('smtp_port', 25)
        )
         return json.dumps({'result':{'description':'{0}'.format(res) },'status':200})
