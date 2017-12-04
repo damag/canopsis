@@ -37,6 +37,9 @@ import smtplib
 import socket
 import re
 
+SMTP_HOST = 'localhost'
+SMTP_PORT = 25
+ACCOUNT = 'canopsis@capensis.fr'
 
 def exports(ws):
     @ws.application.post(
@@ -50,17 +53,18 @@ def exports(ws):
         if mail_info is None:
             return json.dumps({'result':{'description':'None'},'status':500})
         res = sendmail(
-            mail_info.get('account', 'root'),
+            mail_info.get('account', ACCOUNT),
             mail_info.get('recipients', ''),
+            mail_info.get('subject', 'Canopsis alarm report'),
             mail_info.get('body', ''),
-            mail_info.get('smtp_host', 'localhost'),
-            mail_info.get('smtp_port', 25)
-       )
+            mail_info.get('smtp_host', SMTP_HOST),
+            int(mail_info.get('smtp_port', SMTP_PORT))
+        )
         return json.dumps({'result':{'description':'{0}'.format(res) },'status':200})
 
-def sendmail(fromaddr, toaddrs, message, smtp_host, smtp_port):
-    msg = ("From: %s\r\nTo: %s\r\n\r\n"
-       % (fromaddr, ", ".join(toaddrs)))
+def sendmail(fromaddr, toaddrs, subject, message, smtp_host, smtp_port):
+    msg = ("From: %s\r\nTo: %s\r\n\r\nSubject: %s\n\n"
+       % (fromaddr, ", ".join(toaddrs), subject))
     msg = msg + message
     server = smtplib.SMTP(smtp_host, smtp_port)
     server.sendmail(fromaddr, toaddrs, msg)
