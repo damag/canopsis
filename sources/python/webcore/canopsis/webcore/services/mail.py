@@ -53,14 +53,13 @@ def exports(ws):
         if mail_info is None:
             return json.dumps({'result':{'description':'None'},'status':500})
 
-        recipients = mail_info.get('recipients', ''),
+        recipients = mail_info.get('recipients', '')
         if isinstance(recipients, str):
             recipients = [recipients]
 
         res = sendmail(
             mail_info.get('account', ACCOUNT),
             recipients,
-            mail_info.get('recipients', ''),
             mail_info.get('subject', 'Canopsis alarm report'),
             mail_info.get('body', ''),
             mail_info.get('smtp_host', SMTP_HOST),
@@ -69,8 +68,7 @@ def exports(ws):
         return json.dumps({'result':{'description':'{0}'.format(res)},'status':200})
 
 def sendmail(fromaddr, toaddrs, subject, message, smtp_host, smtp_port):
-    msg = ("From: %s\r\nTo: %s\r\n\r\nSubject: %s\n\n"
-       % (fromaddr, ", ".join(toaddrs), subject))
+    msg = ("From: {}\r\nTo: {}\r\n\r\nSubject: {}\n\n".format(fromaddr, ", ".join(toaddrs), subject))
     msg = msg + message
     server = smtplib.SMTP(smtp_host, smtp_port)
     server.sendmail(fromaddr, toaddrs, msg)
